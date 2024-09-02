@@ -2,7 +2,7 @@
 #include "Window.h"
 #include "core/Ntolen.h"
 static const char *source =
-#include "UI.msc"
+#include "UI.msc.inc"
     ;
 
 using namespace ntolen;

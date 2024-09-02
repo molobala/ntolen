@@ -41,16 +41,18 @@ nin posX = 0
 nin dir = 2
 
 win.onUpdate { renderer, fps =>
-    nii (Keybord.pressed("l")) {
-        A.yira("Left Clicked")
+    nii (Keybord.pressed("left")) {
+        A.yira("Left arrow")
+        posX=posX-dir
+    } note nii (Keybord.pressed("right")) {
+       posX=posX+dir
     }
     renderer.color(0, 0, 0, 1)
     renderer.clear();
     renderer.color(250, 250, 0, 1)
     renderer.fill(posX, 0, 200, 200)
-    posX=posX+dir
-    nii posX > 600 dir = -2
-    nii posX < 0 dir = 2
+    
+ 
     renderer.color(20, 250, 0, 1)
     renderer.rect(200, 200, 200, 200)
     renderer.color(0, 250, 200, 1)

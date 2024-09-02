@@ -3,7 +3,7 @@
 #include "Mosc.h"
 #include <SDL3/SDL.h>
 #include "UIComponent.h"
-#include "Input.h"
+#include "InputProcessor.h"
 
 #pragma once
 namespace ntolen
@@ -27,13 +27,16 @@ namespace ntolen
         bool running() { return _running; }
         void stop() { _running = false; }
         void render(float fps);
-        Input* input() { return _input;}
+        InputProcessor* input() { return _input;}
+        void setInputProcessor(InputProcessor* processor) {
+            _input = processor;
+        }
         void registerComponent(UIComponent *component);
         void unregisterComponent(UIComponent *component);
     private:
         Ntolen();
         ~Ntolen();
-        Input *_input;
+        InputProcessor *_input;
         bool _running;
         Uint64 _frame;
         MSCConfig *_config;

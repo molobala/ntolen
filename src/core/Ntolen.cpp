@@ -3,8 +3,10 @@
 #include "widget/Window.h"
 #include <SDL3/SDL.h>
 #include "widget/UI.h"
+#include "Input.h"
+
 static const char *appSource =
-#include "Ntolen.msc"
+#include "Ntolen.msc.inc"
     ;
 
 using namespace ntolen;
@@ -12,7 +14,7 @@ using namespace ntolen;
 Ntolen::Ntolen() : _running(false), _components(), _processors()
 {
     _config = new MSCConfig;
-    _input = new Input;
+    _input = nullptr;
     MSCInitConfig(_config);
     _config->initialHeapSize = 1024 * 2;
     _config->writeFn = [](MVM *vm, const char *text)
@@ -49,6 +51,9 @@ void Ntolen::clean()
     {
         return;
     }
+    if(InputModuleProvider::provider != nullptr) {
+        delete InputModuleProvider::provider;
+    }
     delete _instance;
     _instance = nullptr;
 }
@@ -60,7 +65,8 @@ Ntolen *Ntolen::instance()
     }
     return _instance;
 }
-MVM* Ntolen::runningVm() {
+MVM *Ntolen::runningVm()
+{
     return _instance->vm();
 }
 
@@ -68,7 +74,7 @@ Ntolen::~Ntolen()
 {
 
     delete _config;
-    delete _input;
+    // delete _input;
     delete _runtime;
 }
 
@@ -102,7 +108,7 @@ void Ntolen::_registersPackages()
         MSCSetSlotBool(djuru, 0, true); })
                              .end()
                              .end()
-                             .provide(InputModuleProvider::provider)
+                             .provide(*InputModuleProvider::provider)
                              .build());
     // std::cout<<ui.module("ui")->source()<<std::endl;
     // std::cout<<ui.module("ui")->source()<<std::endl;
@@ -126,16 +132,26 @@ void Ntolen::run(int frame)
                 stop();
                 return;
             }
+            if(!_input) {
+                break;
+            }
             switch (event.type)
             {
             case SDL_EVENT_KEY_DOWN:
             case SDL_EVENT_KEY_UP:
-                _input->processKeybordEvent(SDL_GetKeyName(event.key.key), event.key.state == SDL_PRESSED);
+            {
+                std::string keyName = std::string(SDL_GetKeyName(event.key.key));
+                std::transform(keyName.begin(), keyName.end(), keyName.begin(),
+                               [](unsigned char c)
+                               { return c != ' ' ? std::tolower(c) : '_'; });
+                _input->updateInput(keybord, keyName.c_str(), event.key.state == SDL_PRESSED);
                 break;
+            }
+
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
             case SDL_EVENT_MOUSE_BUTTON_UP:
             {
-                std::string buttonName;
+                const char *buttonName = "";
                 switch (event.button.button)
                 {
                 case SDL_BUTTON_LEFT:
@@ -156,7 +172,7 @@ void Ntolen::run(int frame)
                     break;
                 }
                 bool state = event.button.state == SDL_PRESSED;
-                _input->processMouseEvent(buttonName.c_str(), event.key.state == SDL_PRESSED);
+                _input->updateInput(mouse, buttonName, event.key.state == SDL_PRESSED);
                 break;
             }
             default:

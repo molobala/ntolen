@@ -330,6 +330,7 @@ InterpretResult MoscRuntime::run(const char *root, std::string module, std::stri
 }
 InterpretResult MoscRuntime::runFile(const char *file)
 {
+    std::cout<<"Loading file: "<<file<<std::endl;
     auto source = ResourceManager::readSystemFile(file);
     if (!source)
     {

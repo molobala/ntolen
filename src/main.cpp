@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include "core/Input.h"
 #include "core/Ntolen.h"
 #include "core/widget/Window.h"
 
@@ -13,8 +14,9 @@ int main(int argc, char *argv[])
     }
 
     Ntolen *app = Ntolen::instance();
-
-    MSCInterpretResult result = app->runtime()->runFile("test/hello.msc");
+    Input input;
+    app->setInputProcessor(&input);
+    MSCInterpretResult result = app->runtime()->runFile(argv[1]);
     auto code = app->runtime()->exitCode();
     Ntolen::clean();
     if (code != 0)
