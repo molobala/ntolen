@@ -1,3 +1,5 @@
+nani "input"
+
 kulu App {
     dunan dialen running
     dunan dialen kill()

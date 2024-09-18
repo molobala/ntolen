@@ -2,6 +2,7 @@
 #include "msc.h"
 #include <iostream>
 #include "helper/ResourceManager.h"
+#include "helper/logger.h"
 
 using namespace ntolen;
 struct MVM;
@@ -17,14 +18,14 @@ MethodRegistry ClassRegistry::method(const char *signature, bool isStatic)
     auto met = _methods.find(key);
     if (met != _methods.end())
     {
-        std::cout << "Fetching method " << key << ':' << met->second.method() << std::endl;
+        Logger::debug("Fetching method %s %p", key.c_str(), met->second.method());
         return _methods.at(key);
     }
     else
     {
         for (auto const &[key, val] : _methods)
         {
-            std::cout << "Key:" << key << (val.isStatic() ? "static " : "") << signature << ":" << val.method() << std::endl;
+            Logger::debug("Key: %s %s %s: %p", key.c_str(), (val.isStatic() ? "static " : ""), signature, val.method());
         }
     }
     return MethodRegistry();
@@ -32,7 +33,7 @@ MethodRegistry ClassRegistry::method(const char *signature, bool isStatic)
 void ClassRegistry::newMethod(const char *signature, bool isStatic, MSCExternMethodFn value)
 {
     auto key = (isStatic ? "static " : "") + std::string(signature);
-    std::cout << "Registering method " << signature << " " << key << ":" << value << std::endl;
+    Logger::debug("Registering method %s %s", signature, key.c_str());
     _methods.insert(std::pair<std::string, MethodRegistry>(key, MethodRegistry(signature, isStatic, value)));
 }
 ModuleRegistry::ModuleRegistry(const char *name, const char **source) : _name(name), _source(source), _classes()
@@ -59,7 +60,7 @@ void PackageRegistry::newModule(ModuleRegistry &module)
 ModuleRegistry PackageRegistry::module(const char *name)
 {
     auto key = std::string(name);
-    std::cout << "Finding module: " << name << std::endl;
+    Logger::debug("Finding module: %s", name);
     return _modules[key];
 }
 
@@ -85,7 +86,6 @@ MoscRuntime::MoscRuntime(MSCConfig *config) : _rootDirectory(nullptr), _moduleDi
         MSCExternMethodFn method = thisRuntime->bindBuiltInExternMethod(module, className,
                                                                         isStatic, signature);
 
-        // std::cout<<"Fetching method:::: "<<(isStatic ? "static" : "")<<signature<<method<<std::endl;
         if (method != nullptr)
         {
             return method;
@@ -290,7 +290,6 @@ MSCExternMethodFn MoscRuntime::bindBuiltInExternMethod(const char *name,
         return nullptr;
 
     MethodRegistry method = clazz->method(signature, isStatic);
-    std::cout << "BIN" << method.method() << std::endl;
     return method.method();
 }
 MSCExternClassMethods MoscRuntime::bindBuiltInExternClass(const char *moduleName, const char *className)
@@ -309,7 +308,6 @@ MSCExternClassMethods MoscRuntime::bindBuiltInExternClass(const char *moduleName
     methods.allocate = method.method();
     method = clazz->method("<finalize>", true);
     methods.finalize = (MSCFinalizerFn)method.method();
-    std::cout << "Class bound" << methods.finalize << "vs" << methods.allocate << std::endl;
     return methods;
 }
 std::string MoscRuntime::resolveModule(const char *importer, const char *name)
@@ -330,11 +328,11 @@ InterpretResult MoscRuntime::run(const char *root, std::string module, std::stri
 }
 InterpretResult MoscRuntime::runFile(const char *file)
 {
-    std::cout<<"Loading file: "<<file<<std::endl;
+    Logger::debug("Loading file: %s", file);
     auto source = ResourceManager::readSystemFile(file);
     if (!source)
     {
-        std::cerr << "File not found" << std::endl;
+        Logger::error("File not found");
         exit(65);
     }
     auto module = std::make_unique<Path>(file);

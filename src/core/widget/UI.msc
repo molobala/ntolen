@@ -1,22 +1,191 @@
 
+dunan kulu Point {
+    @weele
+    dilan kura(x, y) => gansan
+    dunan x
+    dunan y
+}
+dunan kulu Vector {
+     @weele
+    dilan kura(x, y, z) => gansan
+    dunan x
+    dunan y
+    dunan z
+}
+dunan kulu Rect {
+    @weele
+    dilan kura(x, y, w, h) => gansan
+    dunan x
+    dunan y
+    dunan w
+    dunan h
+    contains(x, y) => (x > ale.x && x < ale.x + ale.w ) && (y > ale.y && y < ale.y + ale.h)
+}
+dunan kulu Color {
+    @weele
+    dilan kura(r, g, b, a) => gansan
+    dunan r
+    dunan g
+    dunan b
+    dunan a
+    dunan value
+
+    dialen black => Color(0, 0, 0, 255)
+    dialen white => Color(255, 255, 255, 255)
+    dialen transparent => Color(0, 0, 0, 0)
+    dialen red => Color(255, 0, 0, 255)
+    dialen green => Color(0, 255, 0, 255)
+    dialen blue => Color(0, 0, 255, 255)
+
+    valueOf(color) {
+        nin r = color & 0xFF
+        nin g = (color & (0xFF << 8)) >> 8
+        nin b = (color & (0xFF << 16)) >> 16
+        nin a = (color & (0xFF << 24)) >> 24
+        segin niin Color(r, g, b, a)
+    }
+    parse(str) {
+        nin size = str.hakan
+        nii (size != 3 && size != 6 && size != 9) {
+            Djuru.tike("Invalid color string")
+        }
+        nii (size == 3) {
+            # complete it
+            str = "0x${str[0] * 2}${str[1] * 2}${str[2] * 2}FF"
+        } note nii (size == 6) {
+            str = "0x${str}FF"
+        } note {
+            str = "0x$str"
+        }
+        segin niin Diat.kaboSebenna(str)
+    }
+}
+dunan kulu Surface {
+    @weele
+    dilan kura(w, h) => gansan
+    dunan width
+    dunan height
+    dunan pixels
+    dunan size
+    dunan setAt(x,y,c)
+    dunan clear(r, g, b, a)
+}
+dunan kulu Font {
+     @weele
+    dilan kura(src, size) => gansan
+    dunan createTexture_(text, color)
+    texture(render, text, color) => Texture(render, ale.createTexture_(text, color))
+}
+kulu Paint {
+     nin _canvas
+     nin _area
+     nin _texture
+     @weele
+     dilan kura(x, y, w, h) {
+        ale._canvas = Surface(w, h)
+        ale._area = Rect(x, y, w, h)
+     }
+     @weele
+     dilan kura(pos, w, h) {
+        ale._canvas = Surface(w, h)
+        ale._area = Rect(pos.x, pos.y, w, h)
+     }
+     width => ale._canvas.width
+     height => ale._canvas.height
+
+     dirty => ale._texture == gansan
+     draw(renderer) {
+        nii (ale.dirty) {
+            ale._texture = Texture(renderer, ale._canvas)
+        }
+        renderer.drawTexture(ale._texture, gansan, ale._area)
+     }
+     paint(point, color) {
+        ale.paint(point.x, point.y, color)
+     }
+     paint(x, y, color) {
+        nii(!ale._area.contains(x, y)) {
+            segin
+        }
+        ale._canvas.setAt(x, y, color.value)
+        ale._texture == gansan
+     }
+     clear() {
+        ale.clear(Color.black)
+     }
+     
+     clear(color) {
+        ale.clear(color.r, color.g, color.b, color.a)
+     }
+     clear(r, g, b) {
+         ale.clear(r, g, b, 0xFF)
+     }
+     clear(r, g, b, a) {
+        ale._canvas.clear(r, g, b, a)
+     }
+}
+kulu FileSystemImage {
+    nin src
+    nin _texture
+    @weele
+    dilan kura(src) {
+        ale.src = src
+    }
+    dunan load_(src)
+    texture(render) {
+        nii ale._texture == gansan ale._texture = ale.load_(ale.src)
+        segin niin Texture(render, ale._texture)
+    }
+}
+
+dunan kulu Texture {
+    @weele
+    dilan kura(render, data) => gansan
+    dunan width
+    dunan height
+}
 dunan kulu Renderer {
-    dunan clear()
-    dunan rect(x, y, w, h)
-    dunan fill(x, y, w, h)
-    dunan line(x, y, w, h)
-    dunan color(x, y, w, h)
-    dunan point(x, y)
-    dunan complete()
+    dunan clear_()
+    dunan rect_(x, y, w, h)
+    dunan fill_(x, y, w, h)
+    dunan line_(x1, y1, x2, y2)
+    dunan color_(x, y, w, h)
+    dunan point_(x, y)
+    dunan drawTexture_(texture)
+    dunan drawTexture_(texture, src, dest)
+    dunan commit_()
+
+    clear() => ale.clear_()
+    rect(x, y, w, h) => ale.rect_(x, y, w, h)
+    rect(dim) => ale.rect_(dim.x, dim.y, dim.w, dim.h)
+    fill(dim) => ale.fill_(dim.x, dim.y, dim.w, dim.h)
+    fill(x, y, w, h) => ale.fill_(x, y, w, h)
+    line(from, to) => ale.fill_(from.x, from.y, to.x, to.y)
+    line(x1, y1, x2, y2) => ale.fill_(x1, y1, x2, y2)
+    color(r, g, b, a) => ale.color_(r, g, b, a)
+    color(r, g, b) => ale.color_(r, g, b, 1)
+    color(color) => ale.color_(color.r, color.g, color.b, color.a)
+    point(p) => ale.point_(p.x, p.y)
+    point(x, y) => ale.point_(x, y)
+    drawTexture(tex) => ale.drawTexture_(tex)
+    drawTexture(tex, src, dest) => ale.drawTexture_(tex, src, dest)
+    commit() => ale.commit_()
+    write(text, x, y) {
+
+    }
+    
 }
 dunan kulu Window {
-    dilan kura(title, w, h) {
-        A.yira("Creating window")
-    }
+    @weele
+    dilan kura(title, w, h) => gansan
     dunan show()
     dunan hide()
     dunan renderer
     dunan onUpdate=(fn)
     onUpdate(fn) {
+        nii fn.arity != 1 {
+            Djuru.tike("Invalid update fonction")
+        }
         ale.onUpdate = fn
     }
 }

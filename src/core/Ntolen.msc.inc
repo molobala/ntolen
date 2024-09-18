@@ -1,5 +1,9 @@
 // Generated automatically from src/core/Ntolen.msc. Do not edit.
 R"------(
+nani "input"
+
+
+
 kulu App {
 
     dunan dialen running

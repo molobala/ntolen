@@ -1,5 +1,7 @@
 #include "Input.h"
 #include "Ntolen.h"
+#include "helper/logger.h"
+
 static const char *inputModule =
 #include "Input.msc.inc"
     ;
@@ -9,7 +11,7 @@ using namespace ntolen;
 ModuleProvider* InputModuleProvider::provider = new InputModuleProvider();
 Input::Input(): InputProcessor()
 {
-    SDL_Log("Event created::");
+    Logger::debug("Event created::");
 }
 const char** InputModuleProvider::moduleSource() const {
     return &inputModule;
@@ -34,7 +36,7 @@ void InputModuleProvider::provide(ModuleBuilder &builder)
             Input::gamepadClass = app->runtime()->makeHandle(djuru, 0, "input", "Gamepad");
             Input::mouseClass = app->runtime()->makeHandle(djuru, 0, "input", "Mouse");
             Input::updateFn =  app->runtime()->makeCallHandle("update_(_,_)");
-            std::cout<<"Init input"<<Input::updateFn<<std::endl;
+            Logger::debug("Init input %p", Input::updateFn);
             MSCSetSlotBool(djuru, 0, true);
         })
         .end()
@@ -59,7 +61,7 @@ bool Input::updateInput(InputType type, const char* key, bool state) {
         return false;
      }
      MSCHandle* clazz = (type == keybord) ? Input::keybordClass : Input::mouseClass;
-     std::cout<<"clazz::"<<clazz<<"Type::"<<type<<std::endl;
+     Logger::debug("clazz:: %p Type:: %d", clazz, type);
      MSCEnsureSlots(djuru, 3);
      MSCSetSlotHandle(djuru, 0, clazz);
      MSCSetSlotString(djuru, 1, key);

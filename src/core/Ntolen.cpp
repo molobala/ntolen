@@ -4,6 +4,7 @@
 #include <SDL3/SDL.h>
 #include "widget/UI.h"
 #include "Input.h"
+#include "helper/logger.h"
 
 static const char *appSource =
 #include "Ntolen.msc.inc"
@@ -82,7 +83,11 @@ void Ntolen::_registersPackages()
 {
     // auto ui = Window::package();
     // MoscRuntime::install(ui);
-    UI::init(UIFeature::video | UIFeature::audio);
+    if(!UI::init(UIFeature::video | UIFeature::audio)) {
+        // failure
+        Logger::error("Failed to init");
+        return;
+    }
     UI::install();
     MoscRuntime::install(PackageBuilder("app")
                              .module("app", &appSource)
@@ -110,8 +115,6 @@ void Ntolen::_registersPackages()
                              .end()
                              .provide(*InputModuleProvider::provider)
                              .build());
-    // std::cout<<ui.module("ui")->source()<<std::endl;
-    // std::cout<<ui.module("ui")->source()<<std::endl;
 }
 
 void Ntolen::run(int frame)

@@ -1,0 +1,75 @@
+kabo "ui" nani Window, Paint, Rect, Color
+kabo "app" nani App
+
+nin circle = Tii.kura { painter, centreX, centreY, radius, c =>
+  nin diameter = (radius * 2);
+
+   nin x = (radius - 1);
+   nin y = 0;
+   nin tx = 1;
+   nin ty = 1;
+   nin error = (tx - diameter);
+
+   foo (x >= y) {
+      #  Each of the following renders an octant of the circle
+      painter.paint(centreX + x, centreY - y, c);
+      painter.paint(centreX + x, centreY + y, c);
+      painter.paint(centreX - x, centreY - y, c);
+      painter.paint(centreX - x, centreY + y, c);
+      painter.paint(centreX + y, centreY - x, c);
+      painter.paint(centreX + y, centreY + x, c);
+      painter.paint(centreX - y, centreY - x, c);
+      painter.paint(centreX - y, centreY + x, c);
+
+      nii (error <= 0) {
+         y=y+1;
+         error = error + ty;
+         ty = ty + 2;
+      }
+
+      nii (error > 0) {
+         x = x-1;
+         tx = tx + 2;
+         error = error + (tx - diameter);
+      }
+   }
+}
+nin spiral = Tii.kura { painter, px, py, color =>
+    nin x = 0
+    nin y = 0
+    nin dx = 0
+    nin dy = -1
+    nin t = px.max(py);
+    nin maxI = t*t;
+    seginka((0..maxI) kono i){
+        nii ((-px/2 <= x) && (x <= px/2) && (-py/2 <= y) && (y <= py/2)){
+            painter.paint(x, y, color)
+        }
+        nii( (x == y) || ((x < 0) && (x == -y)) || ((x > 0) && (x == 1-y))){
+            t = dx;
+            dx = -dy;
+            dy = t;
+        }
+        x = x + dx;
+        y = y + dy;
+    }
+}
+
+nin win = Window.kura("Molo", 800, 600)
+nin renderer = win.renderer
+nin painter = Paint(0, 0, 200, 200)
+painter.clear(Color.white)
+nin color = Color.blue
+seginka ((0..painter.height) kono y kay niin 4) {
+    seginka (0..painter.width kono x kay niin 2 + (y % 2)) {
+        painter.paint(x , y, color)
+    }
+}
+circle(painter, 100, 100, 80, Color.blue)
+circle(painter, 100, 100, 70, Color.red)
+spiral(painter, 100, 100, Color.green)
+win.onUpdate { fps =>
+    painter.draw(renderer)
+    renderer.commit()
+}
+App.run()

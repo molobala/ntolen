@@ -1,6 +1,8 @@
 #include "UI.h"
 #include "Window.h"
 #include "core/Ntolen.h"
+#include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
 static const char *source =
 #include "UI.msc.inc"
     ;
@@ -16,7 +18,9 @@ UI::~UI()
 }
 void UI::clean()
 {
-   
+    TTF_Quit();
+    IMG_Quit();
+    SDL_Quit();
 }
 bool UI::initialized = false;
 
@@ -36,8 +40,12 @@ bool UI::init(Uint32 feature)
     {
         sdlFlag |= SDL_INIT_GAMEPAD;
     }
-    initialized = SDL_Init(sdlFlag);
-
+    initialized = SDL_Init(sdlFlag) == 0;
+    initialized = initialized && (IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG) != 0);
+    if(TTF_Init()) {
+        initialized = initialized && true;
+    }
+    SDL_SetLogPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_DEBUG);
     return initialized;
 }
 void UI::install()

@@ -1,5 +1,5 @@
 
-kabo "ui" nani Window
+kabo "ui" nani Window, FileSystemImage, Texture, Rect, Font, Color
 kabo "app" nani App
 kabo "input" nani Keybord, Mouse
 
@@ -37,9 +37,16 @@ nin circle = Tii.kura { renderer, centreX, centreY, radius =>
    }
 }
 nin win = Window.kura("Molo", 800, 600)
+nin renderer = win.renderer
 nin posX = 0
 nin dir = 2
-
+nin image = FileSystemImage("build/magics.png")
+nin texture = image.texture(renderer)
+nin arial = Font("build/arial.ttf", 24)
+nin text = arial.texture(renderer, "Hello World", Color(255, 200, 0, 255))
+A.yira("Text: $text")
+nin src = Rect(0, 0, 104, 150)
+nin pos = Rect(100, 400, 80, (150/104)*80)
 win.onUpdate { renderer, fps =>
     nii (Keybord.pressed("left")) {
         A.yira("Left arrow")
@@ -47,21 +54,23 @@ win.onUpdate { renderer, fps =>
     } note nii (Keybord.pressed("right")) {
        posX=posX+dir
     }
-    renderer.color(0, 0, 0, 1)
+    renderer.color(0, 0, 0, 255)
     renderer.clear();
-    renderer.color(250, 250, 0, 1)
+    renderer.color(250, 250, 0, 255)
     renderer.fill(posX, 0, 200, 200)
     
  
-    renderer.color(20, 250, 0, 1)
+    renderer.color(20, 250, 0, 255)
     renderer.rect(200, 200, 200, 200)
-    renderer.color(0, 250, 200, 1)
+    renderer.color(0, 250, 200, 255)
     renderer.fill(400, 400, 200, 200)
     renderer.point(100, 100)
 
+    renderer.drawTexture(texture, src, pos)
+    renderer.drawTexture(text, gansan, Rect(220, 10, text.width, text.height))
     # renderer.color(250, 250, 0, 1)
     # circle(renderer, posX, 100, 50=);
   
-    renderer.complete()
+    renderer.commit()
 }
 App.run()

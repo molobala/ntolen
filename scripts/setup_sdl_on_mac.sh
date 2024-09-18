@@ -1,25 +1,41 @@
 #!/bin/bash
 source ./scripts/vars.sh
-git submodule update --init -- $DIRECTORY
 
-cd $DIRECTORY
+# Install SDL3
+CURRENT_DIR=$DIRECTORY/SDL3
+git submodule update --init -- $CURRENT_DIR
+
+cd $CURRENT_DIR
 cmake -S . -B $FOLDER -DSDL_STATIC=ON
 cmake --build $FOLDER
-cmake --install $FOLDER
-# if ! [ -d "$DIRECTORY/$FOLDER" ]; then
-#   mkdir ${FOLDER} ; #cd ${FOLDER}
-#   cmake -S . -B build #--disable-shared
-# else
-#   cd $DIRECTORY/$FOLDER
-# fi
 
-# make
-# make install
+cp $CURRENT_DIR/${FOLDER}/libSDL3.a $LIB_DIR
+cp $CURRENT_DIR/${FOLDER}/libSDL3.dylib $LIB_DIR
+cp -r $CURRENT_DIR/include $INCLUDE_DIR/SDL3
+
+# Install SDL3_image
+
+CURRENT_DIR=$DIRECTORY/SDL3_image
+git submodule update --init -- $CURRENT_DIR
+
+cd $CURRENT_DIR
+cmake -S . -B $FOLDER -DSDL3_DIR=../SDL3/$FOLDER
+cmake --build $FOLDER
+
+# cp $CURRENT_DIR/${FOLDER}/libSDL3_image.a $LIB_DIR
+cp $CURRENT_DIR/${FOLDER}/libSDL3_image.dylib $LIB_DIR
+cp -r $CURRENT_DIR/include/SDL3_image $INCLUDE_DIR/SDL3/SDL3_image
 
 
-cp $DIRECTORY/${FOLDER}/libSDL3.a $LIB_DIR
-cp $DIRECTORY/${FOLDER}/libSDL3.dylib $LIB_DIR
-# cp $DIRECTORY/${FOLDER}/sdl3-config $LIB_DIR/sdl3-config
+# Install SDL3_ttf
 
-cp -r $DIRECTORY/include $INCLUDE_DIR/SDL3
-# cp -r $DIRECTORY/${FOLDER}/include/SDL_config.h  $INCLUDE_DIR/SDL3/SDL_config.h
+CURRENT_DIR=$DIRECTORY/SDL3_ttf
+git submodule update --init -- $CURRENT_DIR
+
+cd $CURRENT_DIR
+cmake -S . -B $FOLDER -DSDL3_DIR=../SDL3/$FOLDER
+cmake --build $FOLDER
+
+# cp $CURRENT_DIR/${FOLDER}/libSDL3_image.a $LIB_DIR
+cp $CURRENT_DIR/${FOLDER}/libSDL3_ttf.dylib $LIB_DIR
+cp -r $CURRENT_DIR/include/SDL3_ttf $INCLUDE_DIR/SDL3/SDL3_ttf
