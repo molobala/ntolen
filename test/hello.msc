@@ -39,6 +39,7 @@ nin circle = Tii.kura { renderer, centreX, centreY, radius =>
 nin win = Window.kura("Molo", 800, 600)
 nin renderer = win.renderer
 nin posX = 0
+nin posY = 20
 nin dir = 2
 nin image = FileSystemImage("build/magics.png")
 nin texture = image.texture(renderer)
@@ -47,17 +48,21 @@ nin text = arial.texture(renderer, "Hello World", Color(255, 200, 0, 255))
 A.yira("Text: $text")
 nin src = Rect(0, 0, 104, 150)
 nin pos = Rect(100, 400, 80, (150/104)*80)
-win.onUpdate { renderer, fps =>
+win.onUpdate { fps =>
     nii (Keybord.pressed("left")) {
         A.yira("Left arrow")
         posX=posX-dir
     } note nii (Keybord.pressed("right")) {
        posX=posX+dir
+    } note nii (Keybord.pressed("up")) {
+        posY=posY-1
+    } note nii (Keybord.pressed("down")) {
+        posY=posY+1
     }
     renderer.color(0, 0, 0, 255)
     renderer.clear();
     renderer.color(250, 250, 0, 255)
-    renderer.fill(posX, 0, 200, 200)
+    renderer.fill(posX, posY, 200, 200)
     
  
     renderer.color(20, 250, 0, 255)
@@ -69,7 +74,7 @@ win.onUpdate { renderer, fps =>
     renderer.drawTexture(texture, src, pos)
     renderer.drawTexture(text, gansan, Rect(220, 10, text.width, text.height))
     # renderer.color(250, 250, 0, 1)
-    # circle(renderer, posX, 100, 50=);
+    circle(renderer, posX, 100, 50);
   
     renderer.commit()
 }

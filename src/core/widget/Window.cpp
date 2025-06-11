@@ -231,9 +231,10 @@ void  WindowClassProvider::provide(ClassBuilder& builder) {
         .end()
         .clazz("Texture")
             .constructor([](Djuru* djuru) {
+                auto paramsCount = MSCGetSlotCount(djuru);
                 Texture *texture = (Texture *)MSCSetSlotNewExtern(djuru, 0, 0, sizeof(Texture));
-                 auto renderer = (Renderer *)MSCGetSlotExtern(djuru, 1);
-                 auto surface = (SDL_Surface **)MSCGetSlotExtern(djuru, 2);
+                auto renderer = (Renderer *)MSCGetSlotExtern(djuru, 1);
+                auto surface = (SDL_Surface **)MSCGetSlotExtern(djuru, 2);
                 auto handle = renderer->texture(*surface);
                 new(texture) Texture(handle, (*surface)->w, (*surface)->h);
             })

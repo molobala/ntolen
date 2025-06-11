@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
     app->setInputProcessor(&input);
     MSCInterpretResult result = app->runtime()->runFile(argv[1]);
     auto code = app->runtime()->exitCode();
+    
     Ntolen::clean();
     if (code != 0)
     {

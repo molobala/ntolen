@@ -1,0 +1,13 @@
+kabo "./circle" nani circle
+
+tii fractal(paint, x, y, r, c) {
+  # paint.stroke(0);
+  # paint.strokeWeight(2);
+  circle(paint, x, y, r * 2, c);
+  # Exit condition, stop when radius is too small
+  nii (r > 4) {
+    r = r * 0.75;
+    # Call the function inside the function! (recursion!)
+    fractal(paint, x, y, r, c);
+  }
+}

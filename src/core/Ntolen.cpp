@@ -73,7 +73,6 @@ MVM *Ntolen::runningVm()
 
 Ntolen::~Ntolen()
 {
-
     delete _config;
     // delete _input;
     delete _runtime;

@@ -141,6 +141,7 @@ kulu FileSystemImage {
 dunan kulu Texture {
     @weele
     dilan kura(render, data) => gansan
+    dilan kura(native) => gansan
     dunan width
     dunan height
 }
